@@ -5,9 +5,9 @@
 		<style>
 			* { margin: 0; padding: 0; box-sizing: border-box}
 			body { font: 13px Helvetica, Arial; }
-			form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100% }
-			form input { border: 0; padding: 10px; width: 90%; margin-right: .5% }
-			form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+			.chat-message > form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100% }
+			.chat-message > form input { border: 0; padding: 10px; width: 90%; margin-right: .5% }
+			.chat-message > form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
 			#messages { list-style-type: none; margin: 0; padding: 0; }
 			#messages li { padding: 5px 10px; }
 			#messages li:nth-child(odd) { background: #eee }
@@ -15,25 +15,49 @@
 		<script src="/socket.io/socket.io.js"></script>
 		<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 		<script>
-			$(function() {
+			$(document).ready(function() {
 				var socket = io();
-				$('form').submit(function() {
-					socket.emit('chat message', $('#m').val());
+				var ready = false;
+				$('.chat-message').hide();
+				
+				$('.set-nickname > form').on('submit', function(e) {
+					e.preventDefault();
+					
+					socket.emit('join', $('#nickname').val());
+					$('.set-nickname').hide();
+					$('.chat-message').show();
+					ready = true;
+					return false;
+				});
+				
+				$('.chat-message > form').on('submit', function(msg) {
+					socket.emit('send', $('#m').val());
 					$('#m').val('');
 					return false;
 				});
-				socket.on('chat message', function(msg){
-					console.log(msg);
-					$('#messages').append($('<li>').text(msg));
-				});
+				
+				socket.on('chatroom', function(msg) {
+					if(ready) {
+						$('#messages').append($('<li>').text(msg));
+					}
+				})
 			});
 		</script>
 	</head>
 	<body>
-		<ul id="messages"></ul>
-		<form action="">
-			<input id="m" autocomplete="off"/>
-			<button>Send</button>
-		</form>
+		<div class="set-nickname">
+			<form action="">
+				<p>Please identify yourself</p>
+				Nickname : <input id="nickname">
+				<button>Set</button>
+			</form>
+		</div>
+		<div class="chat-message">
+			<ul id="messages"></ul>
+			<form action="">
+				<input id="m" autocomplete="off"/>
+				<button>Send</button>
+			</form>
+		</div>
 	</body>
 </html>
