@@ -11,6 +11,7 @@ io.on('connection', function(client) {
 	client.on('join', function(name) {
 		connectedNick[client.id] = name;
 		io.emit('chatroom', name + ' joined the room');
+		io.emit('nickname-list', connectedNick);
 	});
 	
 	client.on('send', function(msg) {
@@ -21,16 +22,8 @@ io.on('connection', function(client) {
 	client.on('disconnect', function() {
 		io.emit('chatroom', connectedNick[client.id] + ' left the room');
 		delete connectedNick[client.id];
+		io.emit('nickname-list', connectedNick);
 	});
-	// io.emit('chat message', 'a user connected');
-	//
-	// socket.on('chat message', function(msg){
-	// 	io.emit('chat message', msg);
-	// });
-	//
-	// socket.on('disconnect', function() {
-	// 	io.emit('chat message', 'a user disconnected');
-	// });
 });
 
 http.listen(3000, function() {
