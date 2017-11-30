@@ -24,6 +24,14 @@ io.on('connection', function(client) {
 		delete connectedNick[client.id];
 		io.emit('nickname-list', connectedNick);
 	});
+	
+	client.on('typing', function(isTyping) {
+		if(isTyping) {
+			io.emit('typing', { isTyping: true, name: connectedNick[client.id] });
+		} else {
+			io.emit('typing', { isTyping: false });
+		}
+	});
 });
 
 http.listen(3000, function() {

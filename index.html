@@ -9,8 +9,8 @@
 			.chat-message > form input { border: 0; padding: 10px; width: 90%; margin-right: .5% }
 			.chat-message > form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
 			#messages, #nickname-list { list-style-type: none; margin: 0; padding: 0; }
-			#messages, #nickname-list li { padding: 5px 10px; }
-			#messages, #nickname-list li:nth-child(odd) { background: #eee }
+			#messages li, #nickname-list li { padding: 5px 10px; }
+			#messages li:nth-child(odd), #nickname-list li:nth-child(odd) { background: #eee }
 		</style>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 		<script src="/socket.io/socket.io.js"></script>
@@ -38,6 +38,10 @@
 					return false;
 				});
 				
+				$('#m').on('keyup', function(event) {
+					socket.emit('typing', true);
+				});
+				
 				socket.on('chatroom', function(msg) {
 					if(ready) {
 						$('#messages').append($('<li>').text(msg));
@@ -52,7 +56,18 @@
 							$('#nickname-list').append($('<li>').text(name));
 						});
 					}
-				})
+				});
+				
+				socket.on('typing', function(data) {
+					if(data.isTyping) {
+						$('#typing').text(data.name + ' is typing');
+						setTimeout(function() {
+							socket.emit('typing', false);
+						}, 3000);
+					} else {
+						$('#typing').text('');
+					}
+				});
 			});
 		</script>
 	</head>
@@ -66,6 +81,14 @@
 		</div>
 		<div class="chat-message">
 			<div class="container-fluid">
+				<div class="row">
+					<div class="col-xs-10">
+						<h5 id="typing"></h5>
+					</div>
+					<div class="col-xs-2">
+						<h4>Who's online</h4>
+					</div>
+				</div>
 				<div class="row">
 					<div class="col-xs-10">
 						<div class="row">
