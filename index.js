@@ -32,6 +32,14 @@ io.on('connection', function(client) {
 			io.emit('typing', { isTyping: false });
 		}
 	});
+	
+	client.on('privatemsg', function(to, msg) {
+		for(id in connectedNick) {
+			if(connectedNick[id] === to) {
+				client.to(id).emit('privatemsg', {nick: connectedNick[client.id], msg: msg});
+			}
+		}
+	});
 });
 
 http.listen(3000, function() {

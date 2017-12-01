@@ -32,8 +32,19 @@
 					return false;
 				});
 				
-				$('.chat-message > form').on('submit', function(msg) {
-					socket.emit('send', $('#m').val());
+				$('.chat-message > form').on('submit', function() {
+					var text = $('#m').val();
+					var split = text.split(' ');
+					
+					if(split[0] === '/private') {
+						var nick = split[1];
+						var msg = split[2];
+						
+						socket.emit('privatemsg', nick, msg);
+					} else {
+						socket.emit('send', text);
+					}
+					
 					$('#m').val('');
 					return false;
 				});
@@ -68,6 +79,10 @@
 						$('#typing').text('');
 					}
 				});
+				
+				socket.on('privatemsg', function(data) {
+					$('#messages').append($('<li>').html('<strong><em>' + data.nick + ' says to you ' + data.msg + '</em>'));
+				});
 			});
 		</script>
 	</head>
@@ -75,7 +90,7 @@
 		<div class="set-nickname">
 			<form action="">
 				<p>Please identify yourself</p>
-				Nickname : <input id="nickname">
+				Nickname : <input id="nickname" autocomplete="off" required>
 				<button>Set</button>
 			</form>
 		</div>
